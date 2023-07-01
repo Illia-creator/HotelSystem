@@ -3,6 +3,7 @@ using HotelSystem.Domain.Entities.Dtos;
 using HotelSystem.Domain.Entities.Dtos.HotelDtos;
 using HotelSystem.Domain.Entities.Dtos.PaymentDtos;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.PaymentsRequests;
+using HotelSystem.Domain.Entities.Dtos.RequestDtos.ReservationRequests;
 using HotelSystem.Domain.Entities.Dtos.RoomDtos;
 using HotelSystem.Domain.Entities.Dtos.RoomTypeDtos;
 
@@ -16,21 +17,21 @@ public interface IMenegementRepository
     #endregion
 
     #region Rooms Region
-    Task<IEnumerable<Room>> GetAllRooms();
+    Task<IQueryable<Room>> GetAllRooms();
     Task CreateRoom(CreateRoomDto roomDto);
     Task UpdateRoom(UpdateRoomDto roomDto);
     Task DeleteRoom(Guid id);
     #endregion
 
     #region Payments Region
-    Task<IEnumerable<Payment>> GetAllPayments();
-    Task<IEnumerable<Payment>> GetPaymentByUserName(string name);
-    Task<IEnumerable<Payment>> GetPaymentsByFilter(PaymentFilterRequest paymentFilter);
+    Task<IQueryable<Payment>> GetAllPayments();
+    Task<IQueryable<Payment>> GetPaymentByUserName(string name);
+    Task<IQueryable<Payment>> GetPaymentsByFilter(PaymentFilterRequest paymentFilter);
     Task UpdatePayment(UpdatePaymentDto paymentDto);
     #endregion  
 
     #region Room Types Region
-    Task<IEnumerable<RoomType>> GetAllRoomTypes();
+    Task<IQueryable<RoomType>> GetAllRoomTypes();
     Task CreateRoomType(CreateRoomTypeDto roomDto);
     Task UpdateRoomType(UpdateRoomTypeDto roomDto);
     Task DeleteRoomType(Guid id);
@@ -41,7 +42,8 @@ public interface IMenegementRepository
     Task UpdateReservation(UpdateReservationDto reservationDto);
     Task DeleteReservation(Guid id);
     Task GetReservationByUserName(string name);
-    Task<IEnumerable<Reservation>> GetReservationByFilter();
+    Task<IQueryable<Reservation>> GetReservationByFilter(ReservationFilterRequest reservationFilter);
+    Task<IQueryable<Reservation>> GetAllReservations();
     #endregion
 
          
