@@ -4,6 +4,7 @@ using HotelSystem.Domain.Entities.Dtos.RequestDtos.RoomRequests;
 using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace HotelSystem.Infrastructure.Repositories;
 public class CatalogueRepository : ICatalogueRepository
@@ -26,7 +27,7 @@ public class CatalogueRepository : ICatalogueRepository
         var rooms = _context.Rooms.Where(r => r.HotelId == hotelId);
          
         if (rooms.FirstOrDefault() == null)
-            throw new Exception("No rooms in hotel found!");
+            throw new Exception($"No rooms in hotel with id: {hotelId} found!");
 
         return rooms;
     }
@@ -36,13 +37,14 @@ public class CatalogueRepository : ICatalogueRepository
         var hotel = _context.Hotels.FirstOrDefault(h => h.Id == id);
 
         if (hotel == null)
-            throw new Exception("No hotel found!");
+            throw new Exception($"No hotel with id: {id} found!");
 
         return Task.FromResult(hotel);
     }
 
     public Task<IQueryable<Hotel>> GetHotelsByFilters(HotelFilterRequest filterRequest)
     {
+        var result = JsonSerializer.Serialize(filterRequest);
         throw new NotImplementedException();
     }
 

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 
 namespace HotelSystem.Domain.Entities.Dtos.RequestDtos.RoomRequests;
-public class RoomFilterRequest
+public class RoomFilterRequest : IRequest
 {
     [DefaultValue(null)]
     public double MinPrice { get; set; }

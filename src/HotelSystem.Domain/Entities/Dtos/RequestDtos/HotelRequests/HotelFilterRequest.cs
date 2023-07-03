@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 
 namespace HotelSystem.Domain.Entities.Dtos.RequestDtos.HotelRequests;
-public class HotelFilterRequest
+public class HotelFilterRequest : IRequest
 {
     [DefaultValue(null)]
     public string Name { get; set; }

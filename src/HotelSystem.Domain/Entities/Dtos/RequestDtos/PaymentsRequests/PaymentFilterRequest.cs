@@ -1,5 +1,5 @@
 ﻿namespace HotelSystem.Domain.Entities.Dtos.RequestDtos.PaymentsRequests;
-public class PaymentFilterRequest
+public class PaymentFilterRequest : IRequest
 {
     public bool IsPayed { get; set; }
     public DateOnly PaymentDate { get; set; }
