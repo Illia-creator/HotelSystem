@@ -46,8 +46,6 @@ public class CatalogueController : ControllerBase
     [Route("filter_hotels")]
     public async Task<IActionResult> GetHotelsWithFilters([FromQuery]HotelFilterRequest filter)
     {
-        string jsonRequest = JsonConvert.SerializeObject(filter);
-        var lkj = JsonHandler.ClearDefaultValues(jsonRequest);
         var result = _repository.GetHotelsByFilters(filter);
         return Ok(result);    
     }

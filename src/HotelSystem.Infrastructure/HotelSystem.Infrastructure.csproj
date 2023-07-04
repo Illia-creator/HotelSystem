@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HotelSystem.Application\HotelSystem.Application.csproj" />
     <ProjectReference Include="..\HotelSystem.Domain\HotelSystem.Domain.csproj" />
   </ItemGroup>
 

@@ -3,8 +3,10 @@ using HotelSystem.Domain.Entities.Dtos.RequestDtos.HotelRequests;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.RoomRequests;
 using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
+using Npgsql.Internal.TypeHandlers;
+using HotelSystem.Application.JsonHandlers;
+using JsonHandler = HotelSystem.Application.JsonHandlers.JsonHandler;
+using HotelSystem.Application.FiltersHandler;
 
 namespace HotelSystem.Infrastructure.Repositories;
 public class CatalogueRepository : ICatalogueRepository
@@ -25,7 +27,7 @@ public class CatalogueRepository : ICatalogueRepository
     public async Task<IQueryable<Room>> GetAllRoomsByHotel(Guid hotelId)
     {
         var rooms = _context.Rooms.Where(r => r.HotelId == hotelId);
-         
+
         if (rooms.FirstOrDefault() == null)
             throw new Exception($"No rooms in hotel with id: {hotelId} found!");
 
@@ -44,8 +46,11 @@ public class CatalogueRepository : ICatalogueRepository
 
     public Task<IQueryable<Hotel>> GetHotelsByFilters(HotelFilterRequest filterRequest)
     {
-        var result = JsonSerializer.Serialize(filterRequest);
-        throw new NotImplementedException();
+         var noDefaultValuesJson = JsonHandler.ClearDefaultValues(filterRequest);
+
+         var result = FilterHandler.GetFilterRequest(_context.Hotels, noDefaultValuesJson) ;
+
+         return Task.FromResult(result);
     }
 
     public Task<Room> GetRoomById(Guid id)
