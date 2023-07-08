@@ -1,12 +1,10 @@
-﻿using HotelSystem.Domain.Entities;
+﻿using HotelSystem.Application.FiltersHandler;
+using HotelSystem.Domain.Entities.DbEntities;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.HotelRequests;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.RoomRequests;
 using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
-using Npgsql.Internal.TypeHandlers;
-using HotelSystem.Application.JsonHandlers;
 using JsonHandler = HotelSystem.Application.JsonHandlers.JsonHandler;
-using HotelSystem.Application.FiltersHandler;
 
 namespace HotelSystem.Infrastructure.Repositories;
 public class CatalogueRepository : ICatalogueRepository
@@ -46,20 +44,35 @@ public class CatalogueRepository : ICatalogueRepository
 
     public Task<IQueryable<Hotel>> GetHotelsByFilters(HotelFilterRequest filterRequest)
     {
-         var noDefaultValuesJson = JsonHandler.ClearDefaultValues(filterRequest);
+        var noDefaultValuesJson = JsonHandler.ClearDefaultValues(filterRequest);
 
-         var result = FilterHandler.GetFilterRequest(_context.Hotels, noDefaultValuesJson) ;
+        var hotels = FilterHandler.GetFilterRequest(_context.Hotels, noDefaultValuesJson);
 
-         return Task.FromResult(result);
+        if (hotels == null)
+            throw new Exception($"No hotels with such parameters were found!");
+
+        return Task.FromResult(hotels);
     }
 
     public Task<Room> GetRoomById(Guid id)
     {
-        throw new NotImplementedException();
+        var room = _context.Rooms.FirstOrDefault(r => r.Id == id);
+
+        if (room == null)
+            throw new Exception($"No rooms in hotel with id: {id} found!");
+
+        return Task.FromResult(room);
     }
 
     public Task<IQueryable<Room>> GetRoomsByFilters(RoomFilterRequest filterRequest)
     {
-        throw new NotImplementedException();
+        var noDefaultValuesJson = JsonHandler.ClearDefaultValues(filterRequest);
+
+        var rooms = FilterHandler.GetFilterRequest(_context.Rooms, noDefaultValuesJson);
+
+        if (rooms == null)
+            throw new Exception($"No rooms with such parameters were found!");
+
+        return Task.FromResult(rooms);
     }
 }

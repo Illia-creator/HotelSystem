@@ -1,8 +1,8 @@
-﻿namespace HotelSystem.Domain.Entities;
+﻿namespace HotelSystem.Domain.Entities.DbEntities;
 public class Room
 {
     public Guid Id { get; set; }
-    public double StartPrice { get; set; }
+    public double Price { get; set; }
     public int RoomsNumber { get; set; }
     public string Shower { get; set; }
     public string Toilet { get; set; }

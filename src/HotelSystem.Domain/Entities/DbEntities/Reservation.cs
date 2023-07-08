@@ -1,4 +1,4 @@
-﻿namespace HotelSystem.Domain.Entities;
+﻿namespace HotelSystem.Domain.Entities.DbEntities;
 
 public class Reservation
 {

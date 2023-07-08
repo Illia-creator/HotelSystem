@@ -1,4 +1,4 @@
-﻿using HotelSystem.Domain.Entities;
+﻿using HotelSystem.Domain.Entities.DbEntities;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.HotelRequests;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.RoomRequests;
 using System.Linq.Expressions;

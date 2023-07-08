@@ -1,6 +1,7 @@
-﻿using HotelSystem.Application.JsonHandlers;
+﻿ using HotelSystem.Application.JsonHandlers;
 using HotelSystem.Domain.Entities;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.HotelRequests;
+using HotelSystem.Domain.Entities.Dtos.RequestDtos.RoomRequests;
 using HotelSystem.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -38,16 +39,31 @@ public class CatalogueController : ControllerBase
     [Route("hotel_id")]
     public async Task<IActionResult> GetHotelById(Guid hotelId)
     {
-        var result = _repository.GetHotelById(hotelId);
+        var result = await _repository.GetHotelById(hotelId);
         return Ok(result);
     }
 
     [HttpGet]
     [Route("filter_hotels")]
-    public async Task<IActionResult> GetHotelsWithFilters([FromQuery]HotelFilterRequest filter)
+    public async Task<IActionResult> GetHotelsByFilters([FromQuery]HotelFilterRequest filter)
     {
-        var result = _repository.GetHotelsByFilters(filter);
+        var result = await _repository.GetHotelsByFilters(filter);
         return Ok(result);    
     }
 
+    [HttpGet]
+    [Route("room_id")]
+    public async Task<IActionResult> GetRoomById(Guid id)
+    { 
+        var result = await _repository.GetRoomById(id);
+        return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("filter_rooms")]
+    public async Task<IActionResult> GetRoomsByFilter([FromQuery]RoomFilterRequest filter)
+    {
+        var result = await _repository.GetRoomsByFilters(filter);
+        return Ok(result);
+    }
 }

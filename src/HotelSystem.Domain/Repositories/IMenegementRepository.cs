@@ -1,4 +1,4 @@
-﻿using HotelSystem.Domain.Entities;
+﻿using HotelSystem.Domain.Entities.DbEntities;
 using HotelSystem.Domain.Entities.Dtos;
 using HotelSystem.Domain.Entities.Dtos.HotelDtos;
 using HotelSystem.Domain.Entities.Dtos.PaymentDtos;
