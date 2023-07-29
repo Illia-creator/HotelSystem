@@ -1,4 +1,5 @@
 ﻿using HotelSystem.Domain.Entities.DbEntities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelSystem.Infrastructure.Persistence.DbContexts;

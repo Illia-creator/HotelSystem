@@ -3,13 +3,17 @@ using HotelSystem.Domain.Entities;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.HotelRequests;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.RoomRequests;
 using HotelSystem.Domain.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace HotelSystem.Api.Controllers;
 
+
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class CatalogueController : ControllerBase
 {
     private readonly ICatalogueRepository _repository;

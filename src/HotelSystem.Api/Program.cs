@@ -3,6 +3,7 @@ using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
 using HotelSystem.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -16,6 +17,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ICatalogueRepository, CatalogueRepository>();
+builder.Services.AddScoped<IAuthorisationRepository, AuthorisationRepository>();
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
 builder.Services.AddDbContext<HotelSystemDbContext>(options =>
 {
@@ -43,7 +45,7 @@ builder.Services.AddAuthentication(option =>
         };
     });
 
-builder.Services.AddDefaultIdentity<HotelSystemDbContext>(options =>
+builder.Services.AddDefaultIdentity<IdentityUser>(options =>
         options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<HotelSystemDbContext>();
 
@@ -58,7 +60,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
+app.UseAuthentication();   
+
 app.UseAuthorization();
 
 app.MapControllers();
