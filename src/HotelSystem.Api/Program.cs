@@ -1,5 +1,6 @@
 using HotelSystem.Domain.Entities.ConfigEntities;
 using HotelSystem.Domain.Repositories;
+using HotelSystem.Infrastructure.Hashing;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
 using HotelSystem.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,6 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ICatalogueRepository, CatalogueRepository>();
 builder.Services.AddScoped<IAuthorisationRepository, AuthorisationRepository>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
 builder.Services.AddDbContext<HotelSystemDbContext>(options =>
 {

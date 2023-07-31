@@ -3,6 +3,7 @@ using HotelSystem.Domain.Entities.DbEntities;
 using HotelSystem.Domain.Entities.Dtos.Authenticaton.Incoming;
 using HotelSystem.Domain.Entities.Dtos.Authenticaton.Outcoming;
 using HotelSystem.Domain.Repositories;
+using HotelSystem.Infrastructure.Hashing;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -17,11 +18,13 @@ public class AuthorisationRepository : IAuthorisationRepository
 {
     private readonly HotelSystemDbContext _context;
     private readonly JwtConfig _jwtConfig;
+    private readonly IPasswordHasher _hasher;
 
-    public AuthorisationRepository(HotelSystemDbContext context, IOptionsMonitor<JwtConfig> optionsMonitor)
+    public AuthorisationRepository(HotelSystemDbContext context, IOptionsMonitor<JwtConfig> optionsMonitor, IPasswordHasher hasher)
     {
         _context = context;
         _jwtConfig = optionsMonitor.CurrentValue;
+        _hasher = hasher;
     }
 
     public Task<UserLoginResponseDto> Login(UserLoginRequestDto loginDto)
@@ -33,7 +36,7 @@ public class AuthorisationRepository : IAuthorisationRepository
             if (user == null)
                 throw new Exception("Password does not found");            
 
-            if (user.HashPassword != loginDto.Password)
+            if (!_hasher.Validete(user.HashPassword, loginDto.Password))
                 throw new Exception("Wrong Password");
         }
         catch (Exception ex)
@@ -77,7 +80,7 @@ public class AuthorisationRepository : IAuthorisationRepository
             Surname = registrationDto.Surname,
             PhoneNumber = registrationDto.PhoneNumber,
             Email = registrationDto.Email,
-            HashPassword = registrationDto.Password,
+            HashPassword = _hasher.Secure(registrationDto.Password),
             Role = "user",
             IsDeleted = false,
             MoneyBonuses = 0
