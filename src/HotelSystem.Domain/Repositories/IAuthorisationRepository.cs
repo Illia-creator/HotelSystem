@@ -6,5 +6,5 @@ namespace HotelSystem.Domain.Repositories;
 public interface IAuthorisationRepository
 {
     Task<UserRegistrationResponseDto> Registration(UserRegistrationRequestDto registrationDto);
-    Task<UserLoginResponseDto> Login( UserLoginRequestDto loginDto);
+    Task<UserLoginResponseDto> Login(UserLoginRequestDto loginDto);
 }

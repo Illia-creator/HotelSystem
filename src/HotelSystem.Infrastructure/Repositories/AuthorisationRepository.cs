@@ -2,13 +2,16 @@
 using HotelSystem.Domain.Entities.DbEntities;
 using HotelSystem.Domain.Entities.Dtos.Authenticaton.Incoming;
 using HotelSystem.Domain.Entities.Dtos.Authenticaton.Outcoming;
+using HotelSystem.Domain.Entities.Dtos.Authenticaton.TokenDtos;
 using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.Hashing;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
 
@@ -19,12 +22,18 @@ public class AuthorisationRepository : IAuthorisationRepository
     private readonly HotelSystemDbContext _context;
     private readonly JwtConfig _jwtConfig;
     private readonly IPasswordHasher _hasher;
+    private readonly TokenValidationParameters _tokenValidationParameters;
 
-    public AuthorisationRepository(HotelSystemDbContext context, IOptionsMonitor<JwtConfig> optionsMonitor, IPasswordHasher hasher)
+    public AuthorisationRepository(
+        HotelSystemDbContext context,
+        IOptionsMonitor<JwtConfig> optionsMonitor,
+        IPasswordHasher hasher, 
+        TokenValidationParameters tokenValidationParameters)
     {
         _context = context;
         _jwtConfig = optionsMonitor.CurrentValue;
         _hasher = hasher;
+        _tokenValidationParameters = tokenValidationParameters;
     }
 
     public Task<UserLoginResponseDto> Login(UserLoginRequestDto loginDto)
@@ -55,7 +64,8 @@ public class AuthorisationRepository : IAuthorisationRepository
         return Task.FromResult(new UserLoginResponseDto()
         {
             Success = true,
-            Token = token
+            Token = token.JwtToken,
+            RefreshToken = token.RefreshToken
         });
     }
 
@@ -94,11 +104,12 @@ public class AuthorisationRepository : IAuthorisationRepository
         return Task.FromResult(new UserRegistrationResponseDto()
         {
             Success = true,
-            Token = token
+            Token = token.JwtToken,
+            RefreshToken = token.RefreshToken
         });
     }
 
-    private string GenerateJwtToken(User user)
+    private TokenDataDto GenerateJwtToken(User user)
     {
         var jwtHandler = new JwtSecurityTokenHandler();
 
@@ -119,7 +130,7 @@ public class AuthorisationRepository : IAuthorisationRepository
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             }),
-            Expires = DateTime.UtcNow.AddHours(3),
+            Expires = DateTime.UtcNow.Add(_jwtConfig.ExpiryTimeFrame),
             SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature
@@ -130,6 +141,34 @@ public class AuthorisationRepository : IAuthorisationRepository
 
         var jwtToken = jwtHandler.WriteToken(token);
 
-        return jwtToken;
+        var refreshToken = new RefreshToken()
+        { 
+            Token = $"{RandomStringGenerator(25)}_{Guid.NewGuid()}",
+            UserId = user.Id.ToString(),
+            IsRevoked = false,
+            IsUsed = false,
+            JwtId = token.Id,
+            ExpiryDate = DateTime.UtcNow.AddMonths(6)
+        };
+
+        _context.RefreshTokens.Add(refreshToken);
+        _context.SaveChanges();
+
+        var tokenData = new TokenDataDto
+        {
+            JwtToken = jwtToken,
+            RefreshToken = refreshToken.Token
+        };
+
+        return tokenData;
+    }
+
+    private string RandomStringGenerator(int length)
+    { 
+        var random = new Random();
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
     }
 }

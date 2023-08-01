@@ -3,6 +3,7 @@ using System;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HotelSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(HotelSystemDbContext))]
-    partial class HotelSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230731163231_added refresh token table")]
+    partial class addedrefreshtokentable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,18 +32,23 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Address")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("City")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Site")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -54,6 +62,7 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("CardNumber")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsPayed")
@@ -91,12 +100,15 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("JwtId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Token")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -140,6 +152,7 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Bath")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("HotelId")
@@ -155,9 +168,11 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Shower")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Toilet")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -176,6 +191,7 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -190,9 +206,11 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("HashPassword")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
@@ -202,72 +220,24 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Surname")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Email")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasColumnType("text");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("text");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UserName")
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("IdentityUser");
                 });
 
             modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Payment", b =>
@@ -289,7 +259,9 @@ namespace HotelSystem.Infrastructure.Migrations
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -339,7 +311,8 @@ namespace HotelSystem.Infrastructure.Migrations
 
             modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Reservation", b =>
                 {
-                    b.Navigation("Payment");
+                    b.Navigation("Payment")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Room", b =>

@@ -6,6 +6,7 @@ using HotelSystem.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -25,6 +26,22 @@ builder.Services.AddDbContext<HotelSystemDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
+
+var tokenValidationParameters = new TokenValidationParameters
+{
+
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(key),
+    ValidateIssuer = false,
+    ValidateAudience = false,
+    RequireExpirationTime = false,
+    ValidateLifetime = true
+};
+
+builder.Services.AddSingleton(tokenValidationParameters);
+
 builder.Services.AddAuthentication(option =>
 {
     option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -33,18 +50,8 @@ builder.Services.AddAuthentication(option =>
 })
     .AddJwtBearer(jwt =>
     {
-        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
-
         jwt.SaveToken = true;
-        jwt.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            RequireExpirationTime = false,
-            ValidateLifetime = true
-        };
+        jwt.TokenValidationParameters = tokenValidationParameters;
     });
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
