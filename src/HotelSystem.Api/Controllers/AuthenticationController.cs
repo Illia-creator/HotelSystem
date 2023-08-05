@@ -39,4 +39,13 @@ public class AuthenticationController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPost]
+    [Route("refresh_token")]
+    public async Task<IActionResult>  RefreshToken([FromBody] TokenRequestDto tokenDto)
+    {
+        var result = await _repository.VerifyToken(tokenDto);
+
+        return Ok(result);
+    }
 }

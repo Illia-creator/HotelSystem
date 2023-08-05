@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HotelSystem.Domain.Entities.DbEntities;
+using System.ComponentModel.DataAnnotations;
 
 namespace HotelSystem.Domain.Entities.Dtos.Authenticaton.Incoming;
 
-public class TokenRequest
+public class TokenRequestDto
 {
     [Required]
     public string Token { get; set; }

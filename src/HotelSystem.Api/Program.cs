@@ -21,6 +21,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ICatalogueRepository, CatalogueRepository>();
 builder.Services.AddScoped<IAuthorisationRepository, AuthorisationRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
 builder.Services.AddDbContext<HotelSystemDbContext>(options =>
 {
