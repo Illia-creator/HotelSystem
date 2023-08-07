@@ -141,7 +141,7 @@ public class AuthorisationRepository : IAuthorisationRepository
             });
         }
 
-        var token = TokenRepository.GenerateJwtToken(dbUser, _jwtConfig, _context);
+          var token = TokenRepository.GenerateJwtToken(dbUser, _jwtConfig, _context);
 
         return Task.FromResult(new VerifyTokenDto()
         {
