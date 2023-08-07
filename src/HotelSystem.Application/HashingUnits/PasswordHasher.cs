@@ -1,8 +1,8 @@
 ﻿using System.Security.Cryptography;
 
-namespace HotelSystem.Infrastructure.Hashing;
+namespace HotelSystem.Application.HashingUnits;
 
-public class PasswordHasher : IPasswordHasher
+public static class PasswordHasher 
 {
     private const int saltSize = 16;
     private const int keySize = 32;
@@ -11,7 +11,7 @@ public class PasswordHasher : IPasswordHasher
 
     private static readonly HashAlgorithmName hashAlgorithmName = HashAlgorithmName.SHA256;
 
-    public string Secure(string password)
+    public static string Secure(string password)
     {
         var salt = RandomNumberGenerator.GetBytes(saltSize);
         var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, hashAlgorithmName, keySize);
@@ -19,7 +19,7 @@ public class PasswordHasher : IPasswordHasher
         return string.Join(delimiter, Convert.ToBase64String(salt), Convert.ToBase64String(hash));
     }
 
-    public bool Validete(string hashPassword, string inputPassword)
+    public static bool Validete(string hashPassword, string inputPassword)
     {
         var hashComponents = hashPassword.Split(delimiter);
         var salt = Convert.FromBase64String(hashComponents[0]);

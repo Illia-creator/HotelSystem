@@ -14,23 +14,9 @@ using System.Text;
 
 namespace HotelSystem.Infrastructure.Repositories;
 
-public class TokenRepository : ITokenRepository
+public static class TokenRepository
 {
-    private readonly JwtConfig _jwtConfig;
-    private readonly HotelSystemDbContext _context;
-    private readonly TokenValidationParameters _tokenValidationParameters;
-
-
-    public TokenRepository(IOptionsMonitor<JwtConfig> optionsMonitor,
-        HotelSystemDbContext context, 
-        TokenValidationParameters tokenValidationParameters)
-    {
-        _jwtConfig = optionsMonitor.CurrentValue;
-        _context = context;
-        _tokenValidationParameters = tokenValidationParameters;
-    }
-
-    public async Task<TokenDataDto> GenerateJwtToken(User user)
+    public static async Task<TokenDataDto> GenerateJwtToken(User user, JwtConfig jwtConfig, HotelSystemDbContext context)
     {
         var jwtHandler = new JwtSecurityTokenHandler();
 
@@ -40,7 +26,7 @@ public class TokenRepository : ITokenRepository
             Email = user.Email
         };
 
-        var key = Encoding.ASCII.GetBytes(_jwtConfig.Secret);
+        var key = Encoding.ASCII.GetBytes(jwtConfig.Secret);
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
@@ -51,7 +37,7 @@ public class TokenRepository : ITokenRepository
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             }),
-            Expires = DateTime.UtcNow.Add(_jwtConfig.ExpiryTimeFrame),
+            Expires = DateTime.UtcNow.Add(jwtConfig.ExpiryTimeFrame),
             SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
                     SecurityAlgorithms.HmacSha256Signature
@@ -65,15 +51,15 @@ public class TokenRepository : ITokenRepository
         var refreshToken = new RefreshToken()
         {
             Token = $"{RandomStringGenerator(25)}_{Guid.NewGuid()}",
-            UserId = user.Id.ToString(),
+            UserId = user.Id,
             IsRevoked = false,
             IsUsed = false,
             JwtId = token.Id,
             ExpiryDate = DateTime.UtcNow.AddMonths(6)
         };
 
-        _context.RefreshTokens.Add(refreshToken);
-        _context.SaveChanges();
+        context.RefreshTokens.Add(refreshToken);
+        context.SaveChanges();
 
         var tokenData = new TokenDataDto
         {
@@ -84,11 +70,11 @@ public class TokenRepository : ITokenRepository
         return tokenData;
     }
 
-    public Task<string> VerifyToken(TokenRequestDto tokenDto)
+    public static Task<string> VerifyToken(TokenRequestDto tokenDto, TokenValidationParameters tokenValidationParameters, HotelSystemDbContext context)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
 
-        var principal = tokenHandler.ValidateToken(tokenDto.Token, _tokenValidationParameters, out var validatedToken);
+        var principal = tokenHandler.ValidateToken(tokenDto.Token, tokenValidationParameters, out var validatedToken);
 
         string errorMessage = string.Empty;
 
@@ -115,7 +101,7 @@ public class TokenRepository : ITokenRepository
                 errorMessage = "Jwt Token Has Not Expired";
         }
 
-        var refreshToken = _context.RefreshTokens.FirstOrDefault(x => x.Token == tokenDto.RefreshToken);
+        var refreshToken = context.RefreshTokens.FirstOrDefault(x => x.Token == tokenDto.RefreshToken);
 
         if (refreshToken is null)
             errorMessage = "Invalid Refresh Token";
@@ -136,14 +122,14 @@ public class TokenRepository : ITokenRepository
 
             refreshToken.IsUsed = true;
 
-        _context.RefreshTokens.Update(refreshToken);
+        context.RefreshTokens.Update(refreshToken);
 
-        _context.SaveChanges();
+        context.SaveChanges();
 
         return Task.FromResult(errorMessage);
     }
 
-    private string RandomStringGenerator(int length)
+    private static string RandomStringGenerator(int length)
     {
         var random = new Random();
         const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -154,7 +140,7 @@ public class TokenRepository : ITokenRepository
             .ToArray());
     }
 
-    private DateTime UnixTimeStampToDateTime(long unixDate)
+    private static DateTime UnixTimeStampToDateTime(long unixDate)
     {
         var dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, 0, DateTimeKind.Utc);
 
