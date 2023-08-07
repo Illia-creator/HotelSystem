@@ -1,38 +1,31 @@
-﻿using HotelSystem.Domain.Entities.ConfigEntities;
+﻿using HotelSystem.Application.HashingUnits;
+using HotelSystem.Domain.Entities.ConfigEntities;
 using HotelSystem.Domain.Entities.DbEntities;
 using HotelSystem.Domain.Entities.Dtos.Authenticaton.Incoming;
 using HotelSystem.Domain.Entities.Dtos.Authenticaton.Outcoming;
 using HotelSystem.Domain.Entities.Dtos.Authenticaton.OutcomingDtos;
-using HotelSystem.Domain.Entities.Dtos.Authenticaton.TokenDtos;
 using HotelSystem.Domain.Repositories;
-using HotelSystem.Infrastructure.Hashing;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Claims;
-using System.Text;
 
 namespace HotelSystem.Infrastructure.Repositories;
 
 public class AuthorisationRepository : IAuthorisationRepository
 {
     private readonly HotelSystemDbContext _context;
-    private readonly IPasswordHasher _hasher;
-    private readonly TokenRepository _tokenRepository; 
+    private readonly JwtConfig _jwtConfig;
+    private readonly TokenValidationParameters _tokenValidationParameters;
 
-   
+
     public AuthorisationRepository(
-        HotelSystemDbContext context,        
-        IPasswordHasher hasher,
-        TokenRepository tokenRepository)
+        HotelSystemDbContext context,
+        IOptionsMonitor<JwtConfig> optionsMonitor,
+        TokenValidationParameters tokenValidationParameters)
     {
         _context = context;
-        _hasher = hasher;
-        _tokenRepository = tokenRepository;
+        _jwtConfig = optionsMonitor.CurrentValue;
+        _tokenValidationParameters = tokenValidationParameters;
     }
 
     public Task<UserLoginResponseDto> Login(UserLoginRequestDto loginDto)
@@ -42,9 +35,9 @@ public class AuthorisationRepository : IAuthorisationRepository
         try
         {
             if (user == null)
-                throw new Exception("Password does not found");            
+                throw new Exception("Password does not found");
 
-            if (!_hasher.Validete(user.HashPassword, loginDto.Password))
+            if (!PasswordHasher.Validete(user.HashPassword, loginDto.Password))
                 throw new Exception("Wrong Password");
         }
         catch (Exception ex)
@@ -58,9 +51,9 @@ public class AuthorisationRepository : IAuthorisationRepository
             });
         }
 
-        var token = _tokenRepository.GenerateJwtToken(user);
+        var token = TokenRepository.GenerateJwtToken(user, _jwtConfig, _context);
 
-        var userLoginResponseDto =  new UserLoginResponseDto()
+        var userLoginResponseDto = new UserLoginResponseDto()
         {
             Success = true,
             Token = token.Result.JwtToken,
@@ -68,7 +61,7 @@ public class AuthorisationRepository : IAuthorisationRepository
         };
 
         return Task.FromResult(userLoginResponseDto);
-        
+
     }
 
     public Task<UserRegistrationResponseDto> Registration(UserRegistrationRequestDto registrationDto)
@@ -92,7 +85,7 @@ public class AuthorisationRepository : IAuthorisationRepository
             Surname = registrationDto.Surname,
             PhoneNumber = registrationDto.PhoneNumber,
             Email = registrationDto.Email,
-            HashPassword = _hasher.Secure(registrationDto.Password),
+            HashPassword = PasswordHasher.Secure(registrationDto.Password),
             Role = "user",
             IsDeleted = false,
             MoneyBonuses = 0
@@ -101,7 +94,7 @@ public class AuthorisationRepository : IAuthorisationRepository
         _context.Users.Add(user);
         _context.SaveChanges();
 
-        var token = _tokenRepository.GenerateJwtToken(user);
+        var token = TokenRepository.GenerateJwtToken(user, _jwtConfig, _context);
 
         return Task.FromResult(new UserRegistrationResponseDto()
         {
@@ -113,9 +106,9 @@ public class AuthorisationRepository : IAuthorisationRepository
 
     Task<VerifyTokenDto> IAuthorisationRepository.VerifyToken(TokenRequestDto requestDto)
     {
-        var verifiedStatusOfToken = _tokenRepository.VerifyToken(requestDto);
+        var verifiedStatusOfToken = TokenRepository.VerifyToken(requestDto, _tokenValidationParameters, _context);
 
-        if (!verifiedStatusOfToken.ToString().IsNullOrEmpty())
+        if (!verifiedStatusOfToken.Result.ToString().IsNullOrEmpty())
         {
             return Task.FromResult(new VerifyTokenDto()
             {
@@ -127,7 +120,14 @@ public class AuthorisationRepository : IAuthorisationRepository
             });
         }
 
-        var dbUser = _context.Users.FirstOrDefault(x => x.Id.ToString() == requestDto.Token);
+        var dbUser = _context.RefreshTokens
+            .Where(t => t.Token == requestDto.RefreshToken)
+            .Join(_context.Users,
+            t => t.UserId,
+            u => u.Id,
+            (t, u) => u)
+            .FirstOrDefault();
+                     
 
         if (dbUser == null)
         {
@@ -141,10 +141,10 @@ public class AuthorisationRepository : IAuthorisationRepository
             });
         }
 
-        var token = _tokenRepository.GenerateJwtToken(dbUser);
+          var token = TokenRepository.GenerateJwtToken(dbUser, _jwtConfig, _context);
 
         return Task.FromResult(new VerifyTokenDto()
-        { 
+        {
             Success = true,
             Token = token.Result.JwtToken,
             RefreshToken = token.Result.RefreshToken

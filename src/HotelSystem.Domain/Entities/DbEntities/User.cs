@@ -13,6 +13,5 @@ public class User
     public double MoneyBonuses { get; set; }
 
     public List<Payment> Payments { get; set; } = new List<Payment>();
-
     public List<Reservation> Reservations { get; set; } = new List<Reservation>();
 }

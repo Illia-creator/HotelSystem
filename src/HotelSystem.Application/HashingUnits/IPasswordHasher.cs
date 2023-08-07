@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HotelSystem.Infrastructure.Hashing;
+namespace HotelSystem.Application.HashingUnits;
 
 public interface IPasswordHasher
 {
