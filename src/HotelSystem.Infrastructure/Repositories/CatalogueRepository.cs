@@ -4,6 +4,7 @@ using HotelSystem.Domain.Entities.Dtos.RequestDtos.HotelRequests;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.RoomRequests;
 using HotelSystem.Domain.Repositories;
 using HotelSystem.Infrastructure.Persistence.DbContexts;
+using Microsoft.AspNetCore.Http;
 using JsonHandler = HotelSystem.Application.JsonHandlers.JsonHandler;
 
 namespace HotelSystem.Infrastructure.Repositories;
@@ -21,6 +22,15 @@ public class CatalogueRepository : ICatalogueRepository
         var hotels = _context.Hotels;
         return hotels;
     }
+
+    public async Task<IQueryable<Hotel>> GetAllHotelsWithUser(HttpContext httpContext)
+    {
+        var UserId = httpContext.User.Claims.FirstOrDefault().Value;
+
+        var hotels = _context.Hotels;
+        return hotels;
+    }
+
 
     public async Task<IQueryable<Room>> GetAllRoomsByHotel(Guid hotelId)
     {

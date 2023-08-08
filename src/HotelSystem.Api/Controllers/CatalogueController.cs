@@ -13,7 +13,7 @@ namespace HotelSystem.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class CatalogueController : ControllerBase
 {
     private readonly ICatalogueRepository _repository;
@@ -27,6 +27,8 @@ public class CatalogueController : ControllerBase
     [Route("hotels")]
     public async Task<IActionResult> GetAllHotels()
     {
+        var resulqq = await _repository.GetAllHotelsWithUser(HttpContext);
+
         var result = await _repository.GetAllHotels();
         return Ok(result);
     }
