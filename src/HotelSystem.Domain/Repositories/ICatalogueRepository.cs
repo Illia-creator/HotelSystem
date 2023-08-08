@@ -1,6 +1,7 @@
 ﻿using HotelSystem.Domain.Entities.DbEntities;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.HotelRequests;
 using HotelSystem.Domain.Entities.Dtos.RequestDtos.RoomRequests;
+using Microsoft.AspNetCore.Http;
 
 namespace HotelSystem.Domain.Repositories;
 public interface ICatalogueRepository
@@ -12,4 +13,11 @@ public interface ICatalogueRepository
     Task<IQueryable<Room>> GetRoomsByFilters(RoomFilterRequest filterRequest);
     Task<IQueryable<Room>> GetAllRoomsByHotel(Guid hotelId);
     Task<Room> GetRoomById(Guid id);
+
+
+
+
+
+
+    Task<IQueryable<Hotel>> GetAllHotelsWithUser(HttpContext httpContext);
 }

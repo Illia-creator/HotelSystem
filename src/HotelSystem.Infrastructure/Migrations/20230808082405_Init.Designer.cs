@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HotelSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(HotelSystemDbContext))]
-    [Migration("20230705092242_Room price field rename")]
-    partial class Roompricefieldrename
+    [Migration("20230808082405_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,30 +25,25 @@ namespace HotelSystem.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Hotel", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Hotel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("City")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Site")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -56,13 +51,12 @@ namespace HotelSystem.Infrastructure.Migrations
                     b.ToTable("Hotels");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Payment", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Payment", b =>
                 {
                     b.Property<Guid>("ReservationId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("CardNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsPayed")
@@ -84,7 +78,38 @@ namespace HotelSystem.Infrastructure.Migrations
                     b.ToTable("Payments");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Reservation", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("JwtId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Reservation", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -111,14 +136,13 @@ namespace HotelSystem.Infrastructure.Migrations
                     b.ToTable("Reservations");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Room", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Room", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Bath")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("HotelId")
@@ -134,11 +158,9 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Shower")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Toilet")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -150,14 +172,13 @@ namespace HotelSystem.Infrastructure.Migrations
                     b.ToTable("Rooms");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.RoomType", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.RoomType", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -165,18 +186,16 @@ namespace HotelSystem.Infrastructure.Migrations
                     b.ToTable("RoomTypes");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.User", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("HashPassword")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
@@ -186,19 +205,15 @@ namespace HotelSystem.Infrastructure.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Role")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Surname")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -206,30 +221,41 @@ namespace HotelSystem.Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Payment", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Payment", b =>
                 {
-                    b.HasOne("HotelSystem.Domain.Entities.Reservation", "Reservation")
+                    b.HasOne("HotelSystem.Domain.Entities.DbEntities.Reservation", "Reservation")
                         .WithOne("Payment")
-                        .HasForeignKey("HotelSystem.Domain.Entities.Payment", "ReservationId")
+                        .HasForeignKey("HotelSystem.Domain.Entities.DbEntities.Payment", "ReservationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HotelSystem.Domain.Entities.User", null)
+                    b.HasOne("HotelSystem.Domain.Entities.DbEntities.User", null)
                         .WithMany("Payments")
                         .HasForeignKey("UserId");
 
                     b.Navigation("Reservation");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Reservation", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.RefreshToken", b =>
                 {
-                    b.HasOne("HotelSystem.Domain.Entities.Room", "Room")
+                    b.HasOne("HotelSystem.Domain.Entities.DbEntities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Reservation", b =>
+                {
+                    b.HasOne("HotelSystem.Domain.Entities.DbEntities.Room", "Room")
                         .WithMany("Reservations")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HotelSystem.Domain.Entities.User", "User")
+                    b.HasOne("HotelSystem.Domain.Entities.DbEntities.User", "User")
                         .WithMany("Reservations")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -240,15 +266,15 @@ namespace HotelSystem.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Room", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Room", b =>
                 {
-                    b.HasOne("HotelSystem.Domain.Entities.Hotel", "Hotel")
+                    b.HasOne("HotelSystem.Domain.Entities.DbEntities.Hotel", "Hotel")
                         .WithMany("Rooms")
                         .HasForeignKey("HotelId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("HotelSystem.Domain.Entities.RoomType", "RoomType")
+                    b.HasOne("HotelSystem.Domain.Entities.DbEntities.RoomType", "RoomType")
                         .WithMany("Rooms")
                         .HasForeignKey("RoomTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -259,28 +285,27 @@ namespace HotelSystem.Infrastructure.Migrations
                     b.Navigation("RoomType");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Hotel", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Hotel", b =>
                 {
                     b.Navigation("Rooms");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Reservation", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Reservation", b =>
                 {
-                    b.Navigation("Payment")
-                        .IsRequired();
+                    b.Navigation("Payment");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.Room", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.Room", b =>
                 {
                     b.Navigation("Reservations");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.RoomType", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.RoomType", b =>
                 {
                     b.Navigation("Rooms");
                 });
 
-            modelBuilder.Entity("HotelSystem.Domain.Entities.User", b =>
+            modelBuilder.Entity("HotelSystem.Domain.Entities.DbEntities.User", b =>
                 {
                     b.Navigation("Payments");
 
